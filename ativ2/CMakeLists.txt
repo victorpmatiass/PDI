@@ -8,7 +8,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(include)
 
 # Executável para Laplacian
-add_executable(main_laplacian src/main_laplacian.cpp src/laplacian.cpp)
+add_executable(main_laplacian src/main_laplacian.cpp src/laplacian.cpp src/calcHist.cpp)
 target_link_libraries(main_laplacian ${OpenCV_LIBS})
 
 # Executável para Mean Filter
