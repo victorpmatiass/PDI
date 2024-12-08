@@ -12,5 +12,5 @@ add_executable(main_laplacian src/main_laplacian.cpp src/laplacian.cpp src/calcH
 target_link_libraries(main_laplacian ${OpenCV_LIBS})
 
 # Executável para Mean Filter
-add_executable(main_mean_filter src/main_mean_filter.cpp src/mean_filter.cpp)
-target_link_libraries(main_mean_filter ${OpenCV_LIBS})
+add_executable(main_high_boost src/main_high_boost.cpp src/mean_filter.cpp)
+target_link_libraries(main_high_boost ${OpenCV_LIBS})
