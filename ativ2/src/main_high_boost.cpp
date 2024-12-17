@@ -47,8 +47,8 @@ int main() {
     // Lista de imagens e seus nomes para identificação
     vector<pair<string, string>> imagens = {
         {"../images/a.tif", "Imagem A"},
-        {"../images/dollar.tif", "Imagem Dollar"},
-        {"../images/rim.tif", "Imagem Rim"}
+        {"../images/lua.tif", "Imagem Lua"},
+        {"../images/quadrado.tif", "Imagem Quadrado"}
     };
 
     // Definindo parâmetros do filtro
@@ -96,29 +96,28 @@ int main() {
             filtradas_labeled.push_back(filtrada_labeled);
         }
 
-        // Filtrada com m = 9
-        Mat filtrada_m9 = applyMeanFilter(img, 9);
-        Mat filtrada_m9_labeled = add_label(filtrada_m9, "Filtrada (m = 9)");
+        // Filtrada com m = 3
+        Mat filtrada_m = applyMeanFilter(img, 3);
+        Mat filtrada_m_labeled = add_label(filtrada_m, "Filtrada (m = 9)");
 
-        // Calcular máscara = original - filtrada_m9
+        // Calcular máscara = original - filtrada_m
         Mat mascara;
         {
-            Mat temp, filt16;
-            img.convertTo(temp, CV_16S);       
-            filtrada_m9.convertTo(filt16, CV_16S);
-            Mat diff = temp - filt16;        
-            diff.convertTo(mascara, CV_8U, 1.0, 0);    
+            Mat img16, filt16;
+            img.convertTo(img16, CV_16S);       
+            filtrada_m.convertTo(filt16, CV_16S);
+            mascara = img16 - filt16;   
         }
 
         // Realça imagem: original + k*mascara
         int k = 1; 
         Mat realcada;
         {
-            Mat tempOrig, tempMasc;
-            img.convertTo(tempOrig, CV_16S);
-            mascara.convertTo(tempMasc, CV_16S);
-            Mat sum = tempOrig + k * tempMasc; 
-            sum.convertTo(realcada, CV_8U, 1.0, 0);
+            Mat img16, realcada_temp;
+            img.convertTo(img16, CV_16S);
+            realcada_temp = img16 + k * mascara;
+            realcada_temp.convertTo(realcada, CV_8U);
+            mascara.convertTo(mascara, CV_8U);
         }
 
         // Adicionar rótulos
