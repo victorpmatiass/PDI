@@ -26,7 +26,7 @@ cv::Mat applyMeanFilter(const cv::Mat& img, int m) {
             cv::multiply(window, kernel, result, 1, CV_32F);
 
             float meanValue = cv::sum(result)[0];
-            filteredImg.at<uchar>(i, j) = static_cast<uchar>(meanValue);
+            filteredImg.at<uchar>(i, j) = cv::saturate_cast<uchar>(meanValue);
         }
     }
 
