@@ -21,5 +21,3 @@ add_executable(projeto-1 projeto-1.cpp)
 # Liga o executável com as bibliotecas do OpenCV
 target_link_libraries(projeto-1 ${OpenCV_LIBS})
 
-# (Opcional) Exibe uma mensagem confirmando a localização do OpenCV
-message(STATUS "OpenCV versão ${OpenCV_VERSION} encontrada em ${OpenCV_DIR}")
