@@ -3,6 +3,7 @@
 #include <opencv2/imgproc.hpp>
 #include <iostream>
 #include "laplacian.h"
+#include "calcHist.h"
 
 int main() {
     // Paths to input images
@@ -86,17 +87,12 @@ int main() {
         cv::namedWindow(windowName, cv::WINDOW_NORMAL);
         cv::imshow(windowName, concatenated);
 
-        // Plot Histograms using OpenCV
+        std::vector<int> histOriginal;
+        std::vector<int> histRealcada;
+        calcHist(img, histOriginal);
+        calcHist(imagemRealcada, histRealcada);
+
         int histSize = 256;
-        float range[] = {0, 256};
-        const float* histRange = { range };
-        bool uniform = true, accumulate = false;
-
-        cv::Mat histOriginal, histRealcada;
-
-        // Compute histograms
-        cv::calcHist(&img, 1, 0, cv::Mat(), histOriginal, 1, &histSize, &histRange, uniform, accumulate);
-        cv::calcHist(&imagemRealcada, 1, 0, cv::Mat(), histRealcada, 1, &histSize, &histRange, uniform, accumulate);
 
         // Create an image to display histograms
         int hist_w = 512; int hist_h = 400;
@@ -109,22 +105,22 @@ int main() {
         cv::normalize(histRealcada, histRealcada, 0, histImage.rows, cv::NORM_MINMAX);
 
         // Draw the histograms
-        for(int i = 1; i < histSize; ++i) {
+        for(int i = 0; i < histSize; ++i) {
             cv::line(histImage, 
-                     cv::Point(bin_w*(i-1), hist_h - cvRound(histOriginal.at<float>(i-1))),
-                     cv::Point(bin_w*(i), hist_h - cvRound(histOriginal.at<float>(i))),
-                     cv::Scalar(0,0,0), 2);
-            cv::line(histImage, 
-                     cv::Point(bin_w*(i-1), hist_h - cvRound(histRealcada.at<float>(i-1))),
-                     cv::Point(bin_w*(i), hist_h - cvRound(histRealcada.at<float>(i))),
+                     cv::Point(bin_w * i, hist_h),
+                     cv::Point(bin_w * i, hist_h - histOriginal[i]),
                      cv::Scalar(255,0,0), 2);
+            cv::line(histImage, 
+                     cv::Point(bin_w * i, hist_h),
+                     cv::Point(bin_w * i, hist_h - histRealcada[i]),
+                     cv::Scalar(0,255,0), 2);
         }
 
         // Add titles and legends
         cv::putText(histImage, "Histograma da Imagem Original", cv::Point(10, 30), 
-                    cv::FONT_HERSHEY_SIMPLEX, 0.7, cv::Scalar(0,0,0), 2);
-        cv::putText(histImage, "Histograma da Imagem Realcada", cv::Point(10, 60), 
                     cv::FONT_HERSHEY_SIMPLEX, 0.7, cv::Scalar(255,0,0), 2);
+        cv::putText(histImage, "Histograma da Imagem Realcada", cv::Point(10, 60), 
+                    cv::FONT_HERSHEY_SIMPLEX, 0.7, cv::Scalar(0,255,0), 2);
 
         // Display the histogram
         std::string histWindow = imgName + " - Histograms";
