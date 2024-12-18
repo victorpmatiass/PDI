@@ -1,11 +1,9 @@
 #include "mean_filter.h"
 
 cv::Mat applyMeanFilter(const cv::Mat& img, int m) {
-    // Ensure kernel size is odd
     if (m % 2 == 0) {
         m += 1;
     }
-
     int height = img.rows;
     int width = img.cols;
 
@@ -18,10 +16,8 @@ cv::Mat applyMeanFilter(const cv::Mat& img, int m) {
 
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            // Extract the (m x m) window from the padded image
             cv::Mat window = paddedImg(cv::Rect(j, i, m, m));
 
-            // Perform element-wise multiplication with the kernel and sum the results
             cv::Mat result;
             cv::multiply(window, kernel, result, 1, CV_32F);
 

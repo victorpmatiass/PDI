@@ -8,56 +8,47 @@
 using namespace std;
 using namespace cv;
 
-// Estrutura para armazenar um conjunto de imagens relacionadas
 struct ImageSet {
     Mat original_labeled;        
     Mat filtradas_labeled;      
     Mat enhancement_labeled;     
 };
 
-// Função para adicionar rótulo a uma imagem
+// Adiciona os rótulos
 Mat add_label(const Mat &img, const string &label) {
     Mat img_labeled;
     cv::cvtColor(img, img_labeled, COLOR_GRAY2BGR);
     
-    // Parâmetros para o texto
+    // Parâmetros 
     int font = FONT_HERSHEY_SIMPLEX;
     double fontScale = 0.5;
     int thickness = 1;
     int baseline = 0;
-    
-    // Obter tamanho do texto
+    // posicão e tamanho do texto
     Size textSize = getTextSize(label, font, fontScale, thickness, &baseline);
-    
-    // Posição do texto (canto superior esquerdo)
     Point textOrg(10, textSize.height + 10);
-    
-    // Adicionar um retângulo como fundo para o texto
     rectangle(img_labeled, textOrg + Point(0, baseline), 
               textOrg + Point(textSize.width, -textSize.height), 
               Scalar(0,0,0), FILLED);
     
-    // Adicionar o texto
     putText(img_labeled, label, textOrg, font, fontScale, Scalar(255,255,255), thickness, LINE_AA);
     
     return img_labeled;
 }
 
 int main() {
-    // Lista de imagens e seus nomes para identificação
+    // vetor com pares de caminho e rótulo das imagens
     vector<pair<string, string>> imagens = {
         {"../images/a.tif", "Imagem A"},
         {"../images/lua.tif", "Imagem Lua"},
         {"../images/quadrado.tif", "Imagem Quadrado"}
     };
 
-    // Definindo parâmetros do filtro
+    // Definindo parâmetros do filtro que serão usado
     vector<int> filter_sizes = {3, 5, 9, 15, 35}; 
-
     // Determinar o tamanho comum (usar o menor tamanho entre as imagens para evitar distorção)
     int common_width = INT32_MAX;
     int common_height = INT32_MAX;
-
     // Carregar todas as imagens primeiro para determinar o tamanho comum
     vector<Mat> loaded_images;
     for(auto &p : imagens){
@@ -134,7 +125,6 @@ int main() {
         Mat enhancement_grid;
         hconcat(vector<Mat>{mascara_labeled, realcada_labeled}, enhancement_grid);
 
-        // --- Armazenar o Conjunto de Imagens ---
         ImageSet set;
         set.original_labeled = add_label(img, "Original");
         set.filtradas_labeled = grid; // 3x2 grid com filtragens
@@ -142,7 +132,7 @@ int main() {
 
         imagens_processadas.push_back(set);
 
-        // --- Adicionar um Título Superior para a Comparação das Filtragens ---
+        // Adiciona rótulos
         string title_filters = "Comparacao das Filtragens - " + imageName;
         int font = FONT_HERSHEY_SIMPLEX;
         double fontScale = 1.0;
@@ -156,27 +146,25 @@ int main() {
         Mat final_image_filters;
         vconcat(vector<Mat>{titleImg_filters, grid}, final_image_filters);
 
-        // --- Exibir a Comparação das Filtragens ---
+        // Exibe a comparação das filtragens
         namedWindow(title_filters, WINDOW_NORMAL);
         imshow(title_filters, final_image_filters);
 
-        // --- Adicionar um Título Superior para o Realce da Imagem ---
+        // Adiciona o rótulo para o realce da imagem
         string title_enhancement = "Realce da Imagem - " + imageName;
         Size textSize_enhancement = getTextSize(title_enhancement, font, fontScale, thickness, 0);
         Mat titleImg_enhancement(textSize_enhancement.height + 20, enhancement_grid.cols, enhancement_grid.type(), Scalar(255,255,255)); // fundo branco para o título
         putText(titleImg_enhancement, title_enhancement, Point((enhancement_grid.cols - textSize_enhancement.width)/2, textSize_enhancement.height + 10), 
                 font, fontScale, Scalar(0,0,0), thickness, LINE_AA);
 
-        // Empilhar verticalmente o título e a grade de realce
+        // Empilhar verticalmente
         Mat final_image_enhancement;
         vconcat(vector<Mat>{titleImg_enhancement, enhancement_grid}, final_image_enhancement);
 
-        // --- Exibir o Realce da Imagem ---
+        // realce da imagem
         namedWindow(title_enhancement, WINDOW_NORMAL);
         imshow(title_enhancement, final_image_enhancement);
     }
-
-    // Esperar até que uma tecla seja pressionada para fechar as janelas
     waitKey(0);
 
     return 0;
