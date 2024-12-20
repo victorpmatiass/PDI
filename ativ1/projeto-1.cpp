@@ -37,15 +37,33 @@ cv::Mat redimensionarBilinear(const cv::Mat& imagem, int nova_largura, int nova_
 
     return imagem_redimensionada;
 }
+double calcularErroMedioQuadratico(const cv::Mat& imagem_original, const cv::Mat& imagem_reconstruida) {
+    if (imagem_original.size() != imagem_reconstruida.size() || imagem_original.type() != imagem_reconstruida.type()) {
+        std::cerr << "As imagens devem ter o mesmo tamanho e tipo para o cálculo do MSE." << std::endl;
+        return -1; 
+    }
+    double erro_total = 0.0; 
+    int total_pixels = imagem_original.rows * imagem_original.cols; 
+
+    // Percorre cada pixel e canal
+    for (int y = 0; y < imagem_original.rows; ++y) { 
+        for (int x = 0; x < imagem_original.cols; ++x) { 
+            for (int c = 0; c < imagem_original.channels(); ++c) {
+                double diff = static_cast<double>(imagem_original.at<cv::Vec3b>(y, x)[c]) -
+                              static_cast<double>(imagem_reconstruida.at<cv::Vec3b>(y, x)[c]);
+                erro_total += (diff * diff); 
+            }
+        }
+    }
+    double mse = erro_total / (total_pixels * imagem_original.channels());
+    return mse;
+}
 
 int main(void) {
     int dpi_original, dpi_desejado;
     std::string img_path;
-
-    std::cout << "Digite o caminho da imagem: ";
-    std::cin >> img_path;
     
-    cv::Mat imagem = cv::imread(img_path);
+    cv::Mat imagem = cv::imread("../images/relogio.tif");
     if (imagem.empty()) {
         std::cerr << "Erro ao carregar a imagem!" << std::endl;
         return -1;
@@ -61,8 +79,10 @@ int main(void) {
     int nova_largura = static_cast<int>(imagem.cols * fator_escala);
     int nova_altura = static_cast<int>(imagem.rows * fator_escala);
 
+
     // Redimensiona a imagem manualmente
     cv::Mat imagem_redimensionada = redimensionarBilinear(imagem, nova_largura, nova_altura);
+    cv::Mat imagem_reconstruida = redimensionarBilinear(imagem_redimensionada, imagem.cols, imagem.rows);
 
     // Exibe as imagens
     cv::namedWindow("Imagem original", cv::WINDOW_NORMAL);
@@ -73,7 +93,12 @@ int main(void) {
     cv::resizeWindow("Imagem Redimensionada", 800, 600);
     cv::imshow("Imagem Redimensionada", imagem_redimensionada);
 
-    cv::waitKey(0);
+    cv::namedWindow("Imagem Reconstruida", cv::WINDOW_NORMAL); 
+    cv::resizeWindow("Imagem Reconstruida", 800, 600);        
+    cv::imshow("Imagem Reconstruida", imagem_reconstruida);
+
+    double mse2 = calcularErroMedioQuadratico(imagem, imagem_reconstruida);
+    std::cout << "Erro médio quadrático (MSE) entre original e reconstruída: " << mse2 << std::endl;
 
     std::cout << "Dimensão imagem original: " 
               << imagem.size().width << "x" 
@@ -82,6 +107,12 @@ int main(void) {
     std::cout << "Imagem redimensionada para: " 
               << imagem_redimensionada.size().width << "x" 
               << imagem_redimensionada.size().height << std::endl;
+    
+    std::cout << "Imagem reconstruída para: "
+              << imagem_reconstruida.size().width << "x"
+              << imagem_reconstruida.size().height << std::endl;
+
+    cv::waitKey(0);
 
     return 0;
 }
